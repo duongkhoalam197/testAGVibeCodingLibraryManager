@@ -1,17 +1,18 @@
 package com.example.testaglibrarymanager.feature.borrowticket;
 
-import com.example.testaglibrarymanager.exception.InvalidRequestException;
-import com.example.testaglibrarymanager.exception.ResourceNotFoundException;
+import com.example.testaglibrarymanager.dto.ServiceResult;
+import com.example.testaglibrarymanager.exception.ErrorCode;
 import com.example.testaglibrarymanager.feature.book.Book;
 import com.example.testaglibrarymanager.feature.book.BookRepository;
 import com.example.testaglibrarymanager.feature.borrower.Borrower;
 import com.example.testaglibrarymanager.feature.borrower.BorrowerRepository;
 import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowRequest;
-import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowTicketResponse;
+import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowTicketDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class BorrowTicketServiceImpl implements BorrowTicketService {
@@ -19,35 +20,42 @@ public class BorrowTicketServiceImpl implements BorrowTicketService {
     private final BorrowTicketRepository ticketRepository;
     private final BookRepository bookRepository;
     private final BorrowerRepository borrowerRepository;
+    private final BorrowTicketMapper ticketMapper;
 
     public BorrowTicketServiceImpl(BorrowTicketRepository ticketRepository,
                                    BookRepository bookRepository,
-                                   BorrowerRepository borrowerRepository) {
+                                   BorrowerRepository borrowerRepository,
+                                   BorrowTicketMapper ticketMapper) {
         this.ticketRepository = ticketRepository;
         this.bookRepository = bookRepository;
         this.borrowerRepository = borrowerRepository;
+        this.ticketMapper = ticketMapper;
     }
 
     @Override
     @Transactional
-    public BorrowTicketResponse borrowBook(BorrowRequest request) {
-        Book book = bookRepository.findById(request.bookId())
-                .orElseThrow(() -> new ResourceNotFoundException("Book", "id", request.bookId()));
+    public ServiceResult<BorrowTicketDto> borrowBook(BorrowRequest request) {
+        Optional<Book> bookOpt = bookRepository.findById(request.bookId());
+        if (bookOpt.isEmpty()) {
+            return ServiceResult.fail(ErrorCode.BOOK_NOT_FOUND, "Không tìm thấy sách với ID: " + request.bookId());
+        }
 
-        Borrower borrower = borrowerRepository.findById(request.borrowerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Borrower", "id", request.borrowerId()));
+        Optional<Borrower> borrowerOpt = borrowerRepository.findById(request.borrowerId());
+        if (borrowerOpt.isEmpty()) {
+            return ServiceResult.fail(ErrorCode.BORROWER_NOT_FOUND, "Không tìm thấy người mượn với ID: " + request.borrowerId());
+        }
 
-        boolean isAlreadyBorrowed = ticketRepository.existsByBookIdAndStatus(book.getId(), BorrowTicketStatus.BORROWED);
+        boolean isAlreadyBorrowed = ticketRepository.existsByBookIdAndStatus(request.bookId(), BorrowTicketStatus.BORROWED);
         if (isAlreadyBorrowed) {
-            throw new InvalidRequestException("Cuốn sách này hiện đang được mượn và chưa được trả.");
+            return ServiceResult.fail(ErrorCode.BOOK_ALREADY_BORROWED, "Cuốn sách này hiện đang được mượn và chưa được trả.");
         }
 
         BorrowTicket ticket = new BorrowTicket();
-        ticket.setBook(book);
-        ticket.setBorrower(borrower);
+        ticket.setBook(bookOpt.get());
+        ticket.setBorrower(borrowerOpt.get());
         ticket.setBorrowDate(LocalDateTime.now());
         ticket.setStatus(BorrowTicketStatus.BORROWED);
 
-        return BorrowTicketResponse.fromEntity(ticketRepository.save(ticket));
+        return ServiceResult.success(ticketMapper.toDto(ticketRepository.save(ticket)));
     }
 }

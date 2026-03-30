@@ -1,8 +1,9 @@
 package com.example.testaglibrarymanager.feature.borrowticket.dto;
 
+import com.example.testaglibrarymanager.feature.borrowticket.BorrowTicketStatus;
 import java.time.LocalDateTime;
 
-public record BorrowTicketResponse(
+public record BorrowTicketDto(
         Long id,
         Long bookId,
         String bookTitle,
@@ -10,5 +11,5 @@ public record BorrowTicketResponse(
         String borrowerName,
         LocalDateTime borrowDate,
         LocalDateTime returnDate,
-        String status
+        BorrowTicketStatus status
 ) {}

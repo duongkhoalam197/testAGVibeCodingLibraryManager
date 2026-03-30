@@ -2,12 +2,11 @@ package com.example.testaglibrarymanager.feature.book.dto;
 
 import java.math.BigDecimal;
 
-public record BookResponse(
+public record BookDto(
         Long id,
         String title,
         String author,
         BigDecimal price,
-        CategoryDto category
-) {
-    public record CategoryDto(Long id, String name) {}
-}
+        Long categoryId,
+        String categoryName
+) {}
