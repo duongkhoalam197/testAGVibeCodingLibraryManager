@@ -1,13 +1,14 @@
 package com.example.testaglibrarymanager.feature.borrowticket;
 
-import com.example.testaglibrarymanager.exception.InvalidRequestException;
-import com.example.testaglibrarymanager.exception.ResourceNotFoundException;
+import com.example.testaglibrarymanager.dto.ServiceResult;
+import com.example.testaglibrarymanager.exception.ErrorCode;
 import com.example.testaglibrarymanager.feature.book.Book;
 import com.example.testaglibrarymanager.feature.book.BookRepository;
 import com.example.testaglibrarymanager.feature.borrower.Borrower;
 import com.example.testaglibrarymanager.feature.borrower.BorrowerRepository;
 import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowRequest;
-import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowTicketResponse;
+import com.example.testaglibrarymanager.feature.borrowticket.dto.BorrowTicketDto;
+import com.example.testaglibrarymanager.feature.borrowticket.BorrowTicketStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,27 +32,32 @@ class BorrowTicketServiceImplTest {
     private BookRepository bookRepository;
     @Mock
     private BorrowerRepository borrowerRepository;
+    @Mock
+    private BorrowTicketMapper ticketMapper;
 
     @InjectMocks
     private BorrowTicketServiceImpl ticketService;
 
     @Test
-    @DisplayName("Gặp lỗi ném ra ResourceNotFoundException khi sách (Book) không tồn tại")
-    void borrowBook_bookNotFound_throwsException() {
+    @DisplayName("Trả về thất bại khi sách (Book) không tồn tại")
+    void borrowBook_bookNotFound_returnsFail() {
         // Arrange
         BorrowRequest request = new BorrowRequest(999L, 1L);
         when(bookRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> ticketService.borrowBook(request));
-        assertTrue(exception.getMessage().contains("Book not found"));
+        // Act
+        ServiceResult<BorrowTicketDto> result = ticketService.borrowBook(request);
+
+        // Assert
+        assertFalse(result.isSuccess());
+        assertEquals(ErrorCode.BOOK_NOT_FOUND, result.errorCode());
         verify(bookRepository, times(1)).findById(999L);
-        verifyNoInteractions(borrowerRepository, ticketRepository);
+        verifyNoInteractions(borrowerRepository, ticketRepository, ticketMapper);
     }
 
     @Test
-    @DisplayName("Gặp lỗi ném ra ResourceNotFoundException khi người mượn (Borrower) không tồn tại")
-    void borrowBook_borrowerNotFound_throwsException() {
+    @DisplayName("Trả về thất bại khi người mượn (Borrower) không tồn tại")
+    void borrowBook_borrowerNotFound_returnsFail() {
         // Arrange
         BorrowRequest request = new BorrowRequest(1L, 999L);
         Book mockBook = new Book();
@@ -60,17 +66,20 @@ class BorrowTicketServiceImplTest {
         when(bookRepository.findById(1L)).thenReturn(Optional.of(mockBook));
         when(borrowerRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // Act & Assert
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> ticketService.borrowBook(request));
-        assertTrue(exception.getMessage().contains("Borrower not found"));
+        // Act
+        ServiceResult<BorrowTicketDto> result = ticketService.borrowBook(request);
+
+        // Assert
+        assertFalse(result.isSuccess());
+        assertEquals(ErrorCode.BORROWER_NOT_FOUND, result.errorCode());
         verify(bookRepository, times(1)).findById(1L);
         verify(borrowerRepository, times(1)).findById(999L);
-        verifyNoInteractions(ticketRepository);
+        verifyNoInteractions(ticketRepository, ticketMapper);
     }
 
     @Test
-    @DisplayName("Gặp lỗi ném ra InvalidRequestException khi sách hiện CÒN ĐANG được mượn")
-    void borrowBook_bookAlreadyBorrowed_throwsException() {
+    @DisplayName("Trả về thất bại khi sách hiện CÒN ĐANG được mượn")
+    void borrowBook_bookAlreadyBorrowed_returnsFail() {
         // Arrange
         BorrowRequest request = new BorrowRequest(1L, 2L);
         
@@ -82,19 +91,21 @@ class BorrowTicketServiceImplTest {
 
         when(bookRepository.findById(1L)).thenReturn(Optional.of(mockBook));
         when(borrowerRepository.findById(2L)).thenReturn(Optional.of(mockBorrower));
-        // Giả lập sách đang bị mượn
         when(ticketRepository.existsByBookIdAndStatus(1L, BorrowTicketStatus.BORROWED)).thenReturn(true);
 
-        // Act & Assert
-        Exception exception = assertThrows(InvalidRequestException.class, () -> ticketService.borrowBook(request));
-        assertTrue(exception.getMessage().contains("Cuốn sách này hiện đang được mượn"));
+        // Act
+        ServiceResult<BorrowTicketDto> result = ticketService.borrowBook(request);
+
+        // Assert
+        assertFalse(result.isSuccess());
+        assertEquals(ErrorCode.BOOK_ALREADY_BORROWED, result.errorCode());
         verify(ticketRepository, times(1)).existsByBookIdAndStatus(1L, BorrowTicketStatus.BORROWED);
         verify(ticketRepository, never()).save(any());
     }
 
     @Test
-    @DisplayName("Thành công mượn sách, trả về Request DTO hợp lệ")
-    void borrowBook_success_returnsTicketResponse() {
+    @DisplayName("Thành công mượn sách, trả về Result thành công kèm DTO")
+    void borrowBook_success_returnsSuccessResult() {
         // Arrange
         BorrowRequest request = new BorrowRequest(10L, 20L);
         
@@ -111,22 +122,24 @@ class BorrowTicketServiceImplTest {
         savedTicket.setBorrowDate(LocalDateTime.now());
         savedTicket.setStatus(BorrowTicketStatus.BORROWED);
 
+        BorrowTicketDto mockDto = new BorrowTicketDto(100L, 10L, "Book Title", 20L, "Borrower Name", LocalDateTime.now(), null, BorrowTicketStatus.BORROWED);
+
         when(bookRepository.findById(10L)).thenReturn(Optional.of(mockBook));
         when(borrowerRepository.findById(20L)).thenReturn(Optional.of(mockBorrower));
         when(ticketRepository.existsByBookIdAndStatus(10L, BorrowTicketStatus.BORROWED)).thenReturn(false);
         when(ticketRepository.save(any(BorrowTicket.class))).thenReturn(savedTicket);
+        when(ticketMapper.toDto(any(BorrowTicket.class))).thenReturn(mockDto);
 
         // Act
-        BorrowTicketResponse response = ticketService.borrowBook(request);
+        ServiceResult<BorrowTicketDto> result = ticketService.borrowBook(request);
 
         // Assert
-        assertNotNull(response);
-        assertEquals(100L, response.id());
-        assertEquals(10L, response.bookId());
-        assertEquals(20L, response.borrowerId());
-        assertEquals(BorrowTicketStatus.BORROWED, response.status());
-        assertNotNull(response.borrowDate());
+        assertTrue(result.isSuccess());
+        assertNotNull(result.data());
+        assertEquals(100L, result.data().id());
+        assertEquals(BorrowTicketStatus.BORROWED, result.data().status());
         
         verify(ticketRepository, times(1)).save(any(BorrowTicket.class));
+        verify(ticketMapper, times(1)).toDto(any(BorrowTicket.class));
     }
 }

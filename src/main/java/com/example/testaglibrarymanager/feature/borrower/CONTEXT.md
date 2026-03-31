@@ -1,5 +1,5 @@
 # Borrower — Implementation Context
-> Written: 2026-03-30 | Author: Antigravity
+> Updated: 2026-03-30 | Author: Antigravity
 
 ## Business Context
 This module manages individuals who are authorized to borrow books from the library. It stores essential contact information like email and phone number.
@@ -23,3 +23,6 @@ This module manages individuals who are authorized to borrow books from the libr
 ### 2026-03-30 | Antigravity
 - Initial implementation of Borrower model and repository.
 - Added data seeding logic.
+
+### 2026-03-30 | Antigravity (Session 2)
+- ⚠️ **Architecture Alert**: Borrower is currently using the OLD Exception-driven pattern. Needs a refactor to the **Result Pattern** and **SOLID DTO Mapping** to match the project's new Enterprise standard.

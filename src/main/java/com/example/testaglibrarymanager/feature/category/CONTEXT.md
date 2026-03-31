@@ -1,5 +1,5 @@
 # Category — Implementation Context
-> Written: 2026-03-30 | Author: Antigravity
+> Updated: 2026-03-30 | Author: Antigravity
 
 ## Business Context
 Categories provide classification for books. This is a foundational module used to categorize and filter books in the library system.
@@ -23,3 +23,6 @@ Categories provide classification for books. This is a foundational module used 
 ### 2026-03-30 | Antigravity
 - Initial implementation of Category model and repository.
 - Added data seeding logic.
+
+### 2026-03-30 | Antigravity (Session 2)
+- ⚠️ **Architecture Alert**: This module is currently using the OLD exception-based pattern. It is scheduled for a refactor to the **Result Pattern** (`ServiceResult`) and **SOLID DTO Mapping** to align with the `Book` and `BorrowTicket` features.

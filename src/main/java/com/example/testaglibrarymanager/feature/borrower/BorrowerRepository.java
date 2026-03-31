@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BorrowerRepository extends JpaRepository<Borrower, Long> {
+    boolean existsByEmail(String email);
 }

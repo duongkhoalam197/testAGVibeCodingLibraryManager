@@ -19,9 +19,11 @@ public enum ErrorCode {
 
     // Domain: Borrower
     BORROWER_NOT_FOUND,
+    BORROWER_EMAIL_ALREADY_EXISTS,
     
     // Domain: Category
     CATEGORY_NOT_FOUND,
+    CATEGORY_ALREADY_EXISTS,
 
     // Generic Business Fallback
     BUSINESS_ERROR
