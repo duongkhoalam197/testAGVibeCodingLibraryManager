@@ -37,10 +37,11 @@ project-root/
 
 ```
 1. Đầu session đọc docs, cuối session update docs
-2. Hiểu trước, code sau — đọc CONTEXT.md trước khi sửa module
-3. ADR trước, implement sau — ghi quyết định trước khi code
-4. Không merge code không hiểu — AI viết, người review
-5. Test đi kèm code — không có test = chưa xong
+2. Hiểu trước, code sau — Đọc `service/{feature}/CONTEXT.md` trước khi sửa. ĐÂY LÀ KHU VỰC CHỨA "NÃO BỘ" CỦA TÍNH NĂNG.
+3. Ký sinh & Mỏ Neo — Bất kỳ `CONTEXT.md` nào cũng phải ký sinh vào tầng Service và chứa "Hệ Thống Mỏ Neo Vật Lý" trỏ thẳng đến các file Lõi. Nếu link đứt, XÓA PR!
+4. ADR trước, implement sau — ghi quyết định trước khi code
+5. Không merge code không hiểu — AI viết, người review
+6. Test đi kèm code — không có test = chưa xong
 ```
 
 ---
@@ -138,7 +139,7 @@ Step 4: Viết test
 Step 5: Update docs
         ├── API_SPEC.md     (nếu endpoint mới)
         ├── DATABASE.md     (nếu schema mới)
-        └── CONTEXT.md      (viết cho module mới)
+        └── service/company/CONTEXT.md  (viết cho module mới KÈM BÙA MỎ NEO)
 ```
 
 **Sau mỗi step, bạn nên review trước khi AI làm step tiếp.**
@@ -296,7 +297,7 @@ Security        → không hardcode secret, không log password?
 JPA             → LAZY fetch, @Transactional, Optional?
 Code quality    → file < 300 lines, method < 50 lines?
 Convention      → đúng naming theo PROJECT-RULES?
-Docs            → CONTEXT.md, API_SPEC updated?
+Docs            → CONTEXT.md (KIỂM TRA ĐƯỜNG LINK MỎ NEO), API_SPEC updated?
 Tests           → có test cho happy path + error cases?
 ```
 

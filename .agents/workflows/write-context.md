@@ -8,9 +8,9 @@ at the time it was built. It helps future developers (and AI) understand decisio
 without guessing from code.
 
 ## Where to Create
-Place the file inside the feature package:
+Place the file inside the feature's service package:
 ```
-feature/{feature_name}/CONTEXT.md
+src/main/java/com/example/testaglibrarymanager/service/{feature_name}/CONTEXT.md
 ```
 
 ## Template — Fill Every Section
@@ -18,6 +18,11 @@ feature/{feature_name}/CONTEXT.md
 ```markdown
 # {Feature Name} — Implementation Context
 > Written: {YYYY-MM-DD} | Author: {who built it}
+
+## ⚓ Hệ Thống Mỏ Neo Vật Lý
+- **Lõi Thực Thể (Entity):** `src/main/java/com/example/testaglibrarymanager/model/entity/{Feature}.java`
+- **Bộ Xử Lý (Service):** `src/main/java/com/example/testaglibrarymanager/service/{feature_name}/{Feature}ServiceImpl.java`
+- **Bộ Phát Sóng (Controller):** `src/main/java/com/example/testaglibrarymanager/controller/{Feature}Controller.java`
 
 ## Business Context
 Why does this module exist? What business problem does it solve?
@@ -48,9 +53,10 @@ Things that are intentional trade-offs or not yet implemented:
 ```
 
 ## Rules
-1. Write in English
-2. Be specific — "chose X because Y", not just "chose X"
-3. Keep each section concise (2-5 bullet points max)
-4. "Known Limitations" is critical — prevents future devs from "fixing" intentional trade-offs
-5. NEVER edit old content — only ADD new entries in Refactor Log
-6. Write it NOW while context is fresh — tomorrow you'll forget half the reasons
+1. Write in English (except for the Physical Anchor block title).
+2. **LUẬT THÉP (ANCHORING):** You MUST create the "Hệ Thống Mỏ Neo Vật Lý" block. If a module path changes, the PR reviewer will flag it.
+3. Be specific — "chose X because Y", not just "chose X".
+4. Keep each section concise (2-5 bullet points max).
+5. "Known Limitations" is critical — prevents future devs from "fixing" intentional trade-offs.
+6. NEVER edit old content — only ADD new entries in Refactor Log.
+7. Write it NOW while context is fresh — tomorrow you'll forget half the reasons.

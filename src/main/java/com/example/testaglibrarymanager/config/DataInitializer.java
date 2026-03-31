@@ -1,9 +1,10 @@
 package com.example.testaglibrarymanager.config;
 
-import com.example.testaglibrarymanager.feature.borrower.Borrower;
-import com.example.testaglibrarymanager.feature.borrower.BorrowerRepository;
-import com.example.testaglibrarymanager.feature.category.Category;
-import com.example.testaglibrarymanager.feature.category.CategoryRepository;
+import com.example.testaglibrarymanager.model.entity.Borrower;
+import com.example.testaglibrarymanager.repository.CategoryRepository;
+import com.example.testaglibrarymanager.repository.BorrowerRepository;
+import com.example.testaglibrarymanager.model.entity.Category;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -40,3 +41,4 @@ public class DataInitializer {
         };
     }
 }
+

@@ -17,64 +17,55 @@
 
 ---
 
-## 1. Package Structure
+## 1. Package Structure (Layered)
 
 ```
 com.example.testaglibrarymanager/
 │
 ├── TestAgLibraryManagerApplication.java
 │
-├── config/                              # All configuration classes
-│   └── DataInitializer.java             # Fake data for Categories/Borrowers
+├── config/                              # Cấu hình Spring Boot (OpenAPI, DB Init)
 │
-├── exception/                           # Global exception handling
-│   ├── GlobalExceptionHandler.java      # @RestControllerAdvice
-│   ├── AppException.java                # Base custom exception
-│   ├── ResourceNotFoundException.java
-│   └── InvalidRequestException.java
+├── controller/                          # REST Controllers
+│   ├── BookController.java
+│   └── CategoryController.java
 │
-├── dto/                                 # Shared DTOs
-│   ├── ApiResponse.java                 # Standard response wrapper
+├── mapper/                              # MapStruct hoặc các class chuyển đổi DTO ↔ Entity
+│   ├── BookMapper.java
+│   └── CategoryMapper.java
 │
-├── feature/                             # Business features
-│   ├── book/
-│   │   ├── BookController.java
-│   │   ├── BookService.java             # Interface
-│   │   ├── BookServiceImpl.java         # Implementation
-│   │   ├── BookRepository.java
-│   │   ├── Book.java                    # Entity
-│   │   └── dto/
-│   │       ├── BookRequest.java
-│   │       └── BookResponse.java
-│   │
-│   ├── borrowticket/
-│   │   ├── BorrowTicketController.java
-│   │   ├── BorrowTicketService.java     # Interface
-│   │   ├── BorrowTicketServiceImpl.java # Implementation
-│   │   ├── BorrowTicketRepository.java
-│   │   ├── BorrowTicket.java            # Entity
-│   │   └── dto/
-│   │       ├── BorrowRequest.java
-│   │       └── BorrowTicketResponse.java
-│   │
-│   ├── category/
-│   │   ├── CategoryRepository.java
+├── model/                               # Toàn bộ cấu trúc Dữ liệu
+│   ├── entity/                          # Các lớp JPA
+│   │   ├── Book.java
 │   │   └── Category.java
-│   │
-│   └── borrower/
-│       ├── BorrowerRepository.java
-│       └── Borrower.java
+│   ├── request/                         # DTO Đầu vào
+│   │   └── CreateBookRequest.java
+│   ├── response/                        # DTO Đầu ra
+│   │   └── BookResponse.java
+│   └── dto/                             # Shared DTOs và Transport Objs
+│       ├── ApiResponse.java
+│       └── ServiceResult.java
 │
-├── util/                                # Utility classes (pure static, no state)
+├── repository/                          # JPA Repositories
+│   ├── BookRepository.java
+│   └── CategoryRepository.java
 │
-└── resources/
-    ├── application.properties           # PostgreSQL config
+├── service/                             # Logic nghiệp vụ
+│   ├── BookService.java                 # Intefaces
+│   └── BookServiceImpl.java             # Implementations
+│
+└── util/                                # Utilities chung
+    ├── exception/                       # Custom Exception & Handler
+    │   ├── ErrorCode.java
+    │   └── GlobalExceptionHandler.java
+    └── validator/                       # Các Validator Custom
 ```
 
 ### Package Rules
-- 1 feature = 1 package containing controller, service (interface + impl), repository, entity, DTOs
-- Feature DTOs stay inside the feature's `dto/` sub-package, NOT in the shared `dto/`
-- Shared `dto/` only contains cross-cutting DTOs like `ApiResponse`
+- Tuân thủ cấu trúc Layered Architecture tiêu chuẩn (Tách biệt Model, Controller, Service, Repository, Mapper).
+- KHÔNG gộp chung tất cả vào bên trong `feature/` nữa.
+- Với hệ thống lớn, có thể "group by feature" bên trong từng layer (ví dụ: `service/book/BookServiceImpl.java`).
+- `ApiResponse` và `ServiceResult` dùng chung đặt tại `model/dto`.
 
 ---
 
@@ -230,7 +221,7 @@ public record ApiResponse<T>(
 - [ ] All responses wrapped in `ApiResponse`
 - [ ] Tests cover happy path + error cases
 - [ ] File < 300 lines, method < 50 lines
-- [ ] `CONTEXT.md` updated if important logic changed
+- [ ] `CONTEXT.md` updated if logic changed (Physical Anchor links verified!)
 - [ ] `PROJECT-STATUS.md` updated
 
 ---
@@ -240,7 +231,7 @@ public record ApiResponse<T>(
 | When | Action |
 |------|--------|
 | End of every coding session | Update `docs/PROJECT-STATUS.md` |
-| New feature with non-obvious logic | Create `CONTEXT.md` inside feature package |
+| New feature with non-obvious logic | Create `CONTEXT.md` inside `service/{feature_name}/` with Physical Anchors |
 | Architecture decision | Create new file in `docs/decisions/` |
 | New API endpoints | Update `docs/API_SPEC.md` |
 | Schema changes | Update `docs/DATABASE.md` |

@@ -59,7 +59,8 @@ Review the code changes in this PR. Check every item below — flag violations c
 - [ ] Feature package structure: controller + service + serviceImpl + repository + entity + dto/
 
 ## Documentation
-- [ ] If new feature: CONTEXT.md created inside feature package
+- [ ] **BLOCKER (CONTEXT ANCHOR):** Verify that the `CONTEXT.md` file inside `service/{feature_name}/` still points to valid file paths in its "Hệ Thống Mỏ Neo Vật Lý" block. If any linked class has been renamed/moved (e.g. Entity, Controller, ServiceImpl), fail the PR immediately!
+- [ ] If new feature: CONTEXT.md created inside `service/{feature_name}/`
 - [ ] If logic changed: CONTEXT.md updated (add Refactor Log entry, don't overwrite)
 - [ ] If new endpoint: docs/API_SPEC.md updated
 - [ ] If schema changed: docs/DATABASE.md updated

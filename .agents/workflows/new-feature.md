@@ -10,25 +10,26 @@ Create a new feature module. Follow these steps in exact order.
 - Read `docs/API_SPEC.md` → check if endpoints are already defined
 - Ask me if anything is unclear before writing code
 
-## Step 2: Create Package Structure
+## Step 2: Create Files in Layered Structure
 ```
-feature/{feature_name}/
-├── {Feature}.java                    # Entity
-├── {Feature}Controller.java          # REST controller
-├── {Feature}Service.java             # Service interface
-├── {Feature}ServiceImpl.java         # Service implementation
-├── {Feature}Repository.java          # JPA repository
-└── dto/
-    ├── Create{Feature}Request.java   # Create request DTO (record)
-    ├── Update{Feature}Request.java   # Update request DTO (record)
-    └── {Feature}Response.java        # Response DTO (record + fromEntity)
+src/main/java/com/example/testaglibrarymanager/
+├── model/entity/{Feature}.java                  
+├── model/request/Create{Feature}Request.java    
+├── model/request/Update{Feature}Request.java    
+├── model/response/{Feature}Response.java        
+├── repository/{Feature}Repository.java          
+├── mapper/{Feature}Mapper.java                  
+├── service/{feature_name}/{Feature}Service.java                
+├── service/{feature_name}/{Feature}ServiceImpl.java            
+├── service/{feature_name}/CONTEXT.md            
+└── controller/{Feature}Controller.java          
 ```
 
 Test files (mirror same package under `src/test/java`):
 ```
-feature/{feature_name}/
-├── {Feature}ServiceImplTest.java     # Unit test — service logic
-└── {Feature}ControllerTest.java      # Integration test — full HTTP flow
+src/test/java/com/example/testaglibrarymanager/
+├── service/{feature_name}/{Feature}ServiceImplTest.java     # Unit test
+└── controller/{Feature}ControllerTest.java   # Integration test
 ```
 
 ## Step 3: Implement in This Order
@@ -90,7 +91,7 @@ Verify: status code, response body structure (statusCode, data, message), conten
 ## Step 6: Update Documentation
 - Update `docs/API_SPEC.md` with new endpoints
 - Update `docs/DATABASE.md` if new table/columns added
-- Create `CONTEXT.md` inside the feature package (use /write-context command)
+- Create `CONTEXT.md` inside `service/{feature_name}/` (use /write-context command)
 - Update `docs/PROJECT-STATUS.md` (use /update-status command)
 
 ## Step 7: Verify

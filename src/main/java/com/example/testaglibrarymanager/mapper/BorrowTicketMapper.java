@@ -1,0 +1,43 @@
+package com.example.testaglibrarymanager.mapper;
+
+import com.example.testaglibrarymanager.model.dto.BorrowTicketDto;
+import com.example.testaglibrarymanager.model.response.BorrowTicketResponse;
+import com.example.testaglibrarymanager.model.entity.BorrowTicket;
+
+
+import org.springframework.stereotype.Component;
+
+@Component
+public class BorrowTicketMapper {
+
+    public BorrowTicketDto toDto(BorrowTicket ticket) {
+        if (ticket == null) return null;
+        
+        return new BorrowTicketDto(
+                ticket.getId(),
+                ticket.getBook() != null ? ticket.getBook().getId() : null,
+                ticket.getBook() != null ? ticket.getBook().getTitle() : null,
+                ticket.getBorrower() != null ? ticket.getBorrower().getId() : null,
+                ticket.getBorrower() != null ? ticket.getBorrower().getFullName() : null,
+                ticket.getBorrowDate(),
+                ticket.getReturnDate(),
+                ticket.getStatus()
+        );
+    }
+
+    public BorrowTicketResponse toResponse(BorrowTicketDto dto) {
+        if (dto == null) return null;
+        
+        return new BorrowTicketResponse(
+                dto.id(),
+                dto.bookId(),
+                dto.bookTitle(),
+                dto.borrowerId(),
+                dto.borrowerName(),
+                dto.borrowDate(),
+                dto.returnDate(),
+                dto.status().name()
+        );
+    }
+}
+
