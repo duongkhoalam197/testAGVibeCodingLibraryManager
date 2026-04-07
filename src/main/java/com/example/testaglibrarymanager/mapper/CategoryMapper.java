@@ -5,6 +5,7 @@ import com.example.testaglibrarymanager.model.response.CategoryResponse;
 import com.example.testaglibrarymanager.model.request.CreateCategoryRequest;
 import com.example.testaglibrarymanager.model.entity.Category;
 
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,18 @@ public class CategoryMapper {
         if (entity == null) {
             return null;
         }
-        return new CategoryDto(entity.getId(), entity.getName());
+        return new CategoryDto(null, entity.getId(), entity.getName(), null);
+    }
+
+    public CategoryDto toEventDto(Category entity, String eventType) {
+        if (entity == null) {
+            return null;
+        }
+        return new CategoryDto(
+                eventType,
+                entity.getId(),
+                entity.getName(),
+                LocalDateTime.now());
     }
 
     public CategoryResponse toResponse(CategoryDto dto) {
@@ -32,4 +44,3 @@ public class CategoryMapper {
         return new CategoryResponse(dto.id(), dto.name());
     }
 }
-

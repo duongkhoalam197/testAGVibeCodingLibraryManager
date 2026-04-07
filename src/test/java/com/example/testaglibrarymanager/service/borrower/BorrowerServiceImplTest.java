@@ -8,7 +8,7 @@ import com.example.testaglibrarymanager.repository.BorrowerRepository;
 import com.example.testaglibrarymanager.model.dto.BorrowerDto;
 import com.example.testaglibrarymanager.util.exception.ErrorCode;
 import com.example.testaglibrarymanager.model.request.CreateBorrowerRequest;
-
+import com.example.testaglibrarymanager.messaging.BorrowerEventProducer;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +33,9 @@ class BorrowerServiceImplTest {
     @Mock
     private BorrowerMapper borrowerMapper;
 
+    @Mock
+    private BorrowerEventProducer borrowerEventProducer;
+
     @InjectMocks
     private BorrowerServiceImpl borrowerService;
 
@@ -41,11 +45,13 @@ class BorrowerServiceImplTest {
         CreateBorrowerRequest request = new CreateBorrowerRequest("Hoang", "hoang@test.com", "090");
         Borrower entity = new Borrower("Hoang", "hoang@test.com", "090");
         entity.setId(1L);
-        BorrowerDto dto = new BorrowerDto(1L, "Hoang", "hoang@test.com", "090");
+        BorrowerDto dto = new BorrowerDto(null, 1L, "Hoang", "hoang@test.com", "090", null);
+        BorrowerDto eventDto = new BorrowerDto("borrower.created", 1L, "Hoang", "hoang@test.com", "090", null);
 
         when(borrowerRepository.existsByEmail("hoang@test.com")).thenReturn(false);
         when(borrowerMapper.toEntity(request)).thenReturn(new Borrower("Hoang", "hoang@test.com", "090"));
         when(borrowerRepository.save(any(Borrower.class))).thenReturn(entity);
+        when(borrowerMapper.toEventDto(any(Borrower.class), anyString())).thenReturn(eventDto);
         when(borrowerMapper.toDto(entity)).thenReturn(dto);
 
         ServiceResult<BorrowerDto> result = borrowerService.createBorrower(request);
@@ -53,6 +59,7 @@ class BorrowerServiceImplTest {
         assertTrue(result.isSuccess());
         assertEquals("hoang@test.com", result.data().email());
         verify(borrowerRepository, times(1)).save(any(Borrower.class));
+        verify(borrowerEventProducer, times(1)).publishBorrowerEvent(anyString(), any(BorrowerDto.class));
     }
 
     @Test
@@ -73,7 +80,7 @@ class BorrowerServiceImplTest {
     void getBorrowerById_success_returnsSuccessResult() {
         Borrower entity = new Borrower("Hoang", "hoang@test.com", "090");
         entity.setId(1L);
-        BorrowerDto dto = new BorrowerDto(1L, "Hoang", "hoang@test.com", "090");
+        BorrowerDto dto = new BorrowerDto(null, 1L, "Hoang", "hoang@test.com", "090", null);
 
         when(borrowerRepository.findById(1L)).thenReturn(Optional.of(entity));
         when(borrowerMapper.toDto(entity)).thenReturn(dto);
@@ -103,28 +110,36 @@ class BorrowerServiceImplTest {
         existingBorrower.setId(1L);
         Borrower savedBorrower = new Borrower("Hoang 2", "hoang2@test.com", "091");
         savedBorrower.setId(1L);
-        BorrowerDto dto = new BorrowerDto(1L, "Hoang 2", "hoang2@test.com", "091");
+        BorrowerDto dto = new BorrowerDto(null, 1L, "Hoang 2", "hoang2@test.com", "091", null);
+        BorrowerDto eventDto = new BorrowerDto("borrower.updated", 1L, "Hoang 2", "hoang2@test.com", "091", null);
 
         when(borrowerRepository.findById(1L)).thenReturn(Optional.of(existingBorrower));
         when(borrowerRepository.existsByEmail("hoang2@test.com")).thenReturn(false);
         when(borrowerRepository.save(any(Borrower.class))).thenReturn(savedBorrower);
+        when(borrowerMapper.toEventDto(any(Borrower.class), anyString())).thenReturn(eventDto);
         when(borrowerMapper.toDto(savedBorrower)).thenReturn(dto);
 
         ServiceResult<BorrowerDto> result = borrowerService.updateBorrower(1L, request);
 
         assertTrue(result.isSuccess());
         assertEquals("hoang2@test.com", result.data().email());
+        verify(borrowerEventProducer, times(1)).publishBorrowerEvent(anyString(), any(BorrowerDto.class));
     }
 
     @Test
     @DisplayName("Xóa thành công")
     void deleteBorrower_success_returnsSuccessResult() {
-        when(borrowerRepository.existsById(1L)).thenReturn(true);
+        Borrower entity = new Borrower("Hoang", "hoang@test.com", "090");
+        entity.setId(1L);
+        BorrowerDto eventDto = new BorrowerDto("borrower.deleted", 1L, "Hoang", "hoang@test.com", "090", null);
+
+        when(borrowerRepository.findById(1L)).thenReturn(Optional.of(entity));
+        when(borrowerMapper.toEventDto(any(Borrower.class), anyString())).thenReturn(eventDto);
 
         ServiceResult<Void> result = borrowerService.deleteBorrower(1L);
 
         assertTrue(result.isSuccess());
-        verify(borrowerRepository, times(1)).deleteById(1L);
+        verify(borrowerRepository, times(1)).delete(any(Borrower.class));
+        verify(borrowerEventProducer, times(1)).publishBorrowerEvent(anyString(), any(BorrowerDto.class));
     }
 }
-

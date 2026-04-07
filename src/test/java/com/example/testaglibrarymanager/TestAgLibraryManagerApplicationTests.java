@@ -1,4 +1,4 @@
-package com.example.testaglibrarymanager.service;
+package com.example.testaglibrarymanager;
 
 
 import org.junit.jupiter.api.Test;

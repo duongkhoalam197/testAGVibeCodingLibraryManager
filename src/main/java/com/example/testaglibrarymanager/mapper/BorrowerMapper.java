@@ -5,6 +5,8 @@ import com.example.testaglibrarymanager.model.entity.Borrower;
 import com.example.testaglibrarymanager.model.dto.BorrowerDto;
 import com.example.testaglibrarymanager.model.request.CreateBorrowerRequest;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Component;
 
@@ -23,11 +25,25 @@ public class BorrowerMapper {
             return null;
         }
         return new BorrowerDto(
+                null,
                 entity.getId(),
                 entity.getFullName(),
                 entity.getEmail(),
-                entity.getPhone()
-        );
+                entity.getPhone(),
+                null);
+    }
+
+    public BorrowerDto toEventDto(Borrower entity, String eventType) {
+        if (entity == null) {
+            return null;
+        }
+        return new BorrowerDto(
+                eventType,
+                entity.getId(),
+                entity.getFullName(),
+                entity.getEmail(),
+                entity.getPhone(),
+                LocalDateTime.now());
     }
 
     public BorrowerResponse toResponse(BorrowerDto dto) {
@@ -38,8 +54,6 @@ public class BorrowerMapper {
                 dto.id(),
                 dto.fullName(),
                 dto.email(),
-                dto.phone()
-        );
+                dto.phone());
     }
 }
-

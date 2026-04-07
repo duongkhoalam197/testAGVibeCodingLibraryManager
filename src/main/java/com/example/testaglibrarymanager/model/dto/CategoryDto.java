@@ -1,10 +1,10 @@
 package com.example.testaglibrarymanager.model.dto;
 
-
+import java.time.LocalDateTime;
 
 public record CategoryDto(
-        Long id,
-        String name
-) {
+                String eventType,
+                Long id,
+                String name,
+                LocalDateTime eventTimestamp) {
 }
-
